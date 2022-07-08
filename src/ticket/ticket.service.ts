@@ -12,6 +12,14 @@ import { randomBytes } from 'crypto';
 export class TicketService {
     constructor(@InjectModel('Ticket') private readonly TicketModel: Model<TicketDocument>) { }
 
+    async list() {
+        return await this.TicketModel.find();
+    }
+
+    async get(id: string) {
+        return await this.TicketModel.findById(id);
+    }
+
     async create(createTicketDto: CreateTicketDto, user: User) {
         const ticket = new this.TicketModel({ ...createTicketDto, user_id: user._id });
         return await ticket.save();
@@ -21,7 +29,7 @@ export class TicketService {
         const imageUrls = await this.uploadImages(images);
         const ticket = await this.TicketModel.findById(id);
 
-        ticket.images.concat(imageUrls);
+        ticket.images.push(...imageUrls);
         return await ticket.save();
     }
 
