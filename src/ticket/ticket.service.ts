@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable, HttpStatus } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { TicketDocument } from './schema/ticket.schema';
@@ -12,12 +12,23 @@ import { randomBytes } from 'crypto';
 export class TicketService {
     constructor(@InjectModel('Ticket') private readonly TicketModel: Model<TicketDocument>) { }
 
-    async list() {
+    async list(user: User) {
+        if (user.role === "CUSTOMER") {
+            return await this.TicketModel.find({ user_id: user._id });
+        }
         return await this.TicketModel.find();
     }
 
-    async get(id: string) {
-        return await this.TicketModel.findById(id);
+    async get(id: string, user: User) {
+        const ticket = await this.TicketModel.findById(id);
+        if (ticket.user_id.toString() !== user._id) throw new HttpException('UnAuthorized', HttpStatus.UNAUTHORIZED);
+        return ticket;
+    }
+
+    async setStatus(id: string, status: string, user: User) {
+        const ticket = await this.get(id, user);
+        ticket.status = status;
+        return ticket.save();
     }
 
     async create(createTicketDto: CreateTicketDto, user: User) {

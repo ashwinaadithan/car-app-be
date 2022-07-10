@@ -9,13 +9,13 @@ export class TicketController {
   constructor(private readonly ticketService: TicketService) { }
 
   @Get()
-  list() {
-    return this.ticketService.list();
+  list(@Req() req: Request) {
+    return this.ticketService.list(req['user']);
   }
 
   @Get(':id')
-  get(@Param('id') id: string) {
-    return this.ticketService.get(id);
+  get(@Param('id') id: string, @Req() req: Request) {
+    return this.ticketService.get(id, req['user']);
   }
 
   @Post()
