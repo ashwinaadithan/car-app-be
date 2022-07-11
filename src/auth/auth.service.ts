@@ -28,7 +28,7 @@ export class AuthService {
     const user = await this.UserModel.findOne({ username });
     const isPasswordMatch = await bcrypt.compare(password, user.password_hashed);
 
-    if (isPasswordMatch) throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    if (!isPasswordMatch) throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
 
     const access_token = jwt.sign(user.toJSON(), process.env.JWT_ACCESS_SECRET);
     return { user, access_token };

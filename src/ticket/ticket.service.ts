@@ -21,18 +21,25 @@ export class TicketService {
 
     async get(id: string, user: User) {
         const ticket = await this.TicketModel.findById(id);
-        if (ticket.user_id.toString() !== user._id) throw new HttpException('UnAuthorized', HttpStatus.UNAUTHORIZED);
+        if (ticket.user_id.toString() !== user._id && user.role !== "ADMIN") throw new HttpException('UnAuthorized', HttpStatus.UNAUTHORIZED);
         return ticket;
     }
 
     async setStatus(id: string, status: string, user: User) {
         const ticket = await this.get(id, user);
         ticket.status = status;
-        return ticket.save();
+        return await ticket.save();
     }
 
     async create(createTicketDto: CreateTicketDto, user: User) {
         const ticket = new this.TicketModel({ ...createTicketDto, user_id: user._id });
+        return await ticket.save();
+    }
+
+    async close(id: string, user: User) {
+        if (user.role !== "ADMIN") throw new HttpException('UnAuthorized', HttpStatus.UNAUTHORIZED);
+        const ticket = await this.get(id, user);
+        ticket.status = "CLOSED";
         return await ticket.save();
     }
 

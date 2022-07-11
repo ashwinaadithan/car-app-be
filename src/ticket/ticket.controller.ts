@@ -23,6 +23,11 @@ export class TicketController {
     return this.ticketService.create(createTicketDto, req['user']);
   }
 
+  @Post(':id/close')
+  close(@Param('id') id: string, @Req() req: Request) {
+    return this.ticketService.close(id, req['user']);
+  }
+
   @Post(':id/image')
   @UseInterceptors(FilesInterceptor('images'))
   addImages(@Param('id') id: string, @UploadedFiles() images: Express.Multer.File[]) {
